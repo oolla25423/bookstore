@@ -10,7 +10,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5433:5432"
 
   web:
     build: .
@@ -23,6 +23,13 @@ services:
       - db
     environment:
       - DATABASE_URL=postgresql://postgres:password@db:5432/bookstore
+
+  frontend:
+    image: nginx:alpine
+    volumes:
+      - ./frontend:/usr/share/nginx/html
+    ports:
+      - "3001:80"
 
 volumes:
   postgres_data:

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import User, Author, Book, Order, OrderItem
+from .models import User, Author, Book, Order, OrderItem, Review
 
 
 # Сериализатор для пользователя
@@ -83,3 +83,15 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = '__all__'
         read_only_fields = ['user', 'total_price']
+
+
+# Сериализатор для отзыва
+class ReviewSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    book = BookSerializer(read_only=True)
+    book_id = serializers.IntegerField(write_only=True)
+
+    class Meta:
+        model = Review
+        fields = '__all__'
+        read_only_fields = ['user']

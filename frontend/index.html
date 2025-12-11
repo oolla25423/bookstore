@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Книжный магазин - Главная</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-brand">
+                <i class="fas fa-book"></i>
+                <span>BookStore</span>
+            </div>
+            <div class="nav-links">
+                <a href="#" onclick="showPage('books'); return false;" class="nav-link">
+                    <i class="fas fa-book-open"></i> Каталог
+                </a>
+                <a href="#" onclick="showPage('authors'); return false;" class="nav-link">
+                    <i class="fas fa-user-pen"></i> Авторы
+                </a>
+                <a href="#" onclick="showPage('orders'); return false;" class="nav-link" id="orders-nav" style="display:none;">
+                    <i class="fas fa-shopping-bag"></i> Мои заказы
+                </a>
+                <a href="#" onclick="showCart(); return false;" class="nav-link" id="cart-nav">
+                    <i class="fas fa-shopping-cart"></i> Корзина
+                    <span class="cart-badge" id="cart-count">0</span>
+                </a>
+            </div>
+            <div class="nav-auth">
+                <button class="btn btn-primary" onclick="showLoginModal()" id="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Вход
+                </button>
+                <button class="btn btn-secondary" onclick="showRegisterModal()" id="register-btn">
+                    <i class="fas fa-user-plus"></i> Регистрация
+                </button>
+                <div class="user-menu" id="user-menu" style="display:none;">
+                    <span class="user-name" id="user-name"></span>
+                    <button class="btn btn-danger" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Выход
+                    </button>
+                </div>
+            </div>
+            <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Мобильное меню -->
+    <div class="mobile-menu" id="mobile-menu">
+        <a href="#" onclick="showPage('books'); toggleMobileMenu(); return false;">
+            <i class="fas fa-book-open"></i> Каталог
+        </a>
+        <a href="#" onclick="showPage('authors'); toggleMobileMenu(); return false;">
+            <i class="fas fa-user-pen"></i> Авторы
+        </a>
+        <a href="#" onclick="showPage('orders'); toggleMobileMenu(); return false;" id="orders-mobile-nav" style="display:none;">
+            <i class="fas fa-shopping-bag"></i> Мои заказы
+        </a>
+        <a href="#" onclick="showCart(); toggleMobileMenu(); return false;">
+            <i class="fas fa-shopping-cart"></i> Корзина
+        </a>
+    </div>
+
+    <!-- Основной контент -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Страница каталога книг -->
+            <div id="books-page" class="page active">
+                <div class="page-header">
+                    <h1><i class="fas fa-book-open"></i> Каталог книг</h1>
+                </div>
+
+                <!-- Фильтры и поиск -->
+                <div class="filters-section">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="search-input" placeholder="Поиск по названию, автору, описанию..." onkeyup="handleSearchKeyup(event)">
+                    </div>
+                    <div class="filter-controls">
+                        <select id="author-filter" onchange="applyFilters()">
+                            <option value="">Все авторы</option>
+                        </select>
+                        <select id="sort-select" onchange="applyFilters()">
+                            <option value="">Сортировка</option>
+                            <option value="title">По названию (А-Я)</option>
+                            <option value="-title">По названию (Я-А)</option>
+                            <option value="price">По цене (возр.)</option>
+                            <option value="-price">По цене (убыв.)</option>
+                            <option value="-created_at">Сначала новые</option>
+                            <option value="created_at">Сначала старые</option>
+                        </select>
+                        <button class="btn btn-outline" onclick="resetFilters()">
+                            <i class="fas fa-redo"></i> Сбросить
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Список книг -->
+                <div id="books-list" class="books-grid">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i> Загрузка...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Страница авторов -->
+            <div id="authors-page" class="page">
+                <div class="page-header">
+                    <h1><i class="fas fa-user-pen"></i> Авторы</h1>
+                </div>
+                <div id="authors-list" class="authors-grid">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i> Загрузка...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Страница деталей книги -->
+            <div id="book-detail-page" class="page">
+                <button class="btn btn-outline back-btn" onclick="showPage('books')">
+                    <i class="fas fa-arrow-left"></i> Назад к каталогу
+                </button>
+                <div id="book-detail-content"></div>
+            </div>
+
+            <!-- Страница заказов -->
+            <div id="orders-page" class="page">
+                <div class="page-header">
+                    <h1><i class="fas fa-shopping-bag"></i> Мои заказы</h1>
+                </div>
+                <div id="orders-list">
+                    <div class="loading">
+                        <i class="fas fa-spinner fa-spin"></i> Загрузка...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Страница корзины -->
+            <div id="cart-page" class="page">
+                <div class="page-header">
+                    <h1><i class="fas fa-shopping-cart"></i> Корзина</h1>
+                </div>
+                <div id="cart-content"></div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Модальное окно входа -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-sign-in-alt"></i> Вход в систему</h2>
+                <button class="modal-close" onclick="closeModal('login-modal')">&times;</button>
+            </div>
+            <form id="login-form" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="login-username">
+                        <i class="fas fa-user"></i> Имя пользователя
+                    </label>
+                    <input type="text" id="login-username" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password">
+                        <i class="fas fa-lock"></i> Пароль
+                    </label>
+                    <input type="password" id="login-password" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-sign-in-alt"></i> Войти
+                    </button>
+                </div>
+                <div class="form-footer">
+                    <p>Нет аккаунта? <a href="#" onclick="closeModal('login-modal'); showRegisterModal(); return false;">Зарегистрироваться</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно регистрации -->
+    <div id="register-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-plus"></i> Регистрация</h2>
+                <button class="modal-close" onclick="closeModal('register-modal')">&times;</button>
+            </div>
+            <form id="register-form" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label for="register-username">
+                        <i class="fas fa-user"></i> Имя пользователя
+                    </label>
+                    <input type="text" id="register-username" required minlength="3">
+                </div>
+                <div class="form-group">
+                    <label for="register-email">
+                        <i class="fas fa-envelope"></i> Email
+                    </label>
+                    <input type="email" id="register-email" required>
+                </div>
+                <div class="form-group">
+                    <label for="register-firstname">
+                        <i class="fas fa-id-card"></i> Имя
+                    </label>
+                    <input type="text" id="register-firstname">
+                </div>
+                <div class="form-group">
+                    <label for="register-lastname">
+                        <i class="fas fa-id-card"></i> Фамилия
+                    </label>
+                    <input type="text" id="register-lastname">
+                </div>
+                <div class="form-group">
+                    <label for="register-password">
+                        <i class="fas fa-lock"></i> Пароль
+                    </label>
+                    <input type="password" id="register-password" required minlength="8">
+                    <small></small>Минимум 8 символов</small>
+                </div>
+                <div class="form-group">
+                    <label for="register-confirm">
+                        <i class="fas fa-lock"></i> Подтверждение пароля
+                    </label>
+                    <input type="password" id="register-confirm" required minlength="8">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-user-plus"></i> Зарегистрироваться
+                    </button>
+                </div>
+                <div class="form-footer">
+                    <p>Уже есть аккаунт? <a href="#" onclick="closeModal('register-modal'); showLoginModal(); return false;">Войти</a></p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 BookStore. Все права защищены.</p>
+        </div>
+    </footer>
+
+    <!-- Toast уведомления -->
+    <div id="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
