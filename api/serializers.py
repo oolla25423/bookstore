@@ -63,6 +63,16 @@ class BookSerializer(serializers.ModelSerializer):
         model = Book
         fields = '__all__'
 
+    def validate_price(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Цена должна быть положительной")
+        return value
+
+    def validate_stock(self, value):
+        if value < 0:
+            raise serializers.ValidationError("Количество на складе не может быть отрицательным")
+        return value
+
 
 # Сериализатор для элемента заказа
 class OrderItemSerializer(serializers.ModelSerializer):
@@ -72,6 +82,11 @@ class OrderItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrderItem
         fields = '__all__'
+
+    def validate_quantity(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Количество должно быть положительным")
+        return value
 
 
 # Сериализатор для заказа
@@ -95,3 +110,15 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Review
         fields = '__all__'
         read_only_fields = ['user']
+
+    def validate_rating(self, value):
+        if not (1 <= value <= 5):
+            raise serializers.ValidationError("Рейтинг должен быть от 1 до 5")
+        return value
+
+    def validate(self, data):
+        user = self.context['request'].user
+        book_id = data.get('book_id')
+        if Review.objects.filter(user=user, book_id=book_id).exists():
+            raise serializers.ValidationError("Вы уже оставили отзыв на эту книгу")
+        return data

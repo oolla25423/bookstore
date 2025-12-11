@@ -112,7 +112,7 @@ class ExportXLSXTestCase(APITestCase):
 
         # Создаем администратора
         self.admin_user = User.objects.create_superuser(
-            username="admin", email="admin@example.com", password="adminpass123"
+            username="admin", email="admin@example.com", password="adminpass123", role="admin"
         )
 
         # Создаем обычного пользователя
@@ -135,26 +135,26 @@ class ExportXLSXTestCase(APITestCase):
         """Проверка что администратор может экспортировать данные"""
         self.client.force_authenticate(user=self.admin_user)
 
-        response = self.client.get("/api/export/")
+        response = self.client.get("/api/export/?model=book&fields=title&fields=price")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(
             response["Content-Type"],
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
-        self.assertIn("attachment", response["Content-Disposition"])
+        self.assertIn("attachment", response.get("Content-Disposition", ""))
 
     def test_regular_user_cannot_export(self):
         """Проверка что обычный пользователь не может экспортировать"""
         self.client.force_authenticate(user=self.regular_user)
 
-        response = self.client.get("/api/export/")
+        response = self.client.get("/api/export/?model=book&fields=title")
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_guest_cannot_export(self):
         """Проверка что гость не может экспортировать"""
-        response = self.client.get("/api/export/")
+        response = self.client.get("/api/export/?model=book&fields=title")
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
@@ -162,40 +162,36 @@ class ExportXLSXTestCase(APITestCase):
         """Проверка структуры экспортированного XLSX файла"""
         self.client.force_authenticate(user=self.admin_user)
 
-        response = self.client.get("/api/export/")
+        response = self.client.get("/api/export/?model=book&fields=title&fields=price")
 
         # Проверяем что получили файл
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Загружаем файл из ответа
-        file_content = b"".join(response.streaming_content)
+        file_content = response.content
         workbook = load_workbook(filename=io.BytesIO(file_content))
 
         # Проверяем наличие листов
         sheet_names = workbook.sheetnames
-        self.assertIn("Books", sheet_names)
-        self.assertIn("Authors", sheet_names)
-        self.assertIn("Orders", sheet_names)
+        self.assertIn("book", sheet_names)
 
     def test_export_books_sheet_data(self):
         """Проверка данных в листе Books"""
         self.client.force_authenticate(user=self.admin_user)
 
-        response = self.client.get("/api/export/")
+        response = self.client.get("/api/export/?model=book&fields=title&fields=price")
 
         # Загружаем файл
-        file_content = b"".join(response.streaming_content)
+        file_content = response.content
         workbook = load_workbook(filename=io.BytesIO(file_content))
 
-        # Получаем лист Books
-        books_sheet = workbook["Books"]
+        # Получаем лист book
+        books_sheet = workbook["book"]
 
         # Проверяем заголовки (первая строка)
         headers = [cell.value for cell in books_sheet[1]]
-        self.assertIn("Title", headers)
-        self.assertIn("Author", headers)
-        self.assertIn("Price", headers)
-        self.assertIn("Stock", headers)
+        self.assertIn("title", headers)
+        self.assertIn("price", headers)
 
         # Проверяем количество строк (заголовок + 2 книги)
         self.assertGreaterEqual(books_sheet.max_row, 3)
@@ -204,16 +200,16 @@ class ExportXLSXTestCase(APITestCase):
         """Проверка данных в листе Authors"""
         self.client.force_authenticate(user=self.admin_user)
 
-        response = self.client.get("/api/export/")
+        response = self.client.get("/api/export/?model=author&fields=name")
 
-        file_content = b"".join(response.streaming_content)
+        file_content = response.content
         workbook = load_workbook(filename=io.BytesIO(file_content))
 
-        authors_sheet = workbook["Authors"]
+        authors_sheet = workbook["author"]
 
         # Проверяем заголовки
         headers = [cell.value for cell in authors_sheet[1]]
-        self.assertIn("Name", headers)
+        self.assertIn("name", headers)
 
         # Проверяем количество строк (заголовок + 2 автора)
         self.assertGreaterEqual(authors_sheet.max_row, 3)
@@ -223,26 +219,25 @@ class ExportXLSXTestCase(APITestCase):
         self.client.force_authenticate(user=self.admin_user)
 
         # Экспортируем только книги
-        response = self.client.get("/api/export/?tables=books")
+        response = self.client.get("/api/export/?model=book&fields=title")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-        file_content = b"".join(response.streaming_content)
+        file_content = response.content
         workbook = load_workbook(filename=io.BytesIO(file_content))
 
-        # Должен быть только лист Books
+        # Должен быть только лист book
         sheet_names = workbook.sheetnames
-        self.assertIn("Books", sheet_names)
+        self.assertIn("book", sheet_names)
 
     def test_export_file_naming(self):
         """Проверка имени экспортированного файла"""
         self.client.force_authenticate(user=self.admin_user)
 
-        response = self.client.get("/api/export/")
+        response = self.client.get("/api/export/?model=book&fields=title")
 
         content_disposition = response["Content-Disposition"]
-        self.assertIn("bookstore_export", content_disposition)
-        self.assertIn(".xlsx", content_disposition)
+        self.assertIn("book.xlsx", content_disposition)
 
 
 class AdminCRUDTestCase(TestCase):

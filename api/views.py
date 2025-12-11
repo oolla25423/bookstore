@@ -10,6 +10,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from .filters import BookFilter
 from .models import Author, Book, Order, OrderItem, Review, User
 from .serializers import (
     AuthorSerializer,
@@ -159,7 +160,7 @@ class BookListCreateView(generics.ListCreateAPIView):
         filters.SearchFilter,
         filters.OrderingFilter,
     ]
-    filterset_fields = ["author", "price"]  # Фильтрация по автору и цене
+    filterset_class = BookFilter
     search_fields = [
         "title",
         "description",
@@ -285,7 +286,7 @@ def create_order(request):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-    order = Order.objects.create(user=request.user)
+    order = Order.objects.create(user=request.user, total_price=total_price)
     for item in order_items:
         OrderItem.objects.create(
             order=order,
@@ -297,7 +298,7 @@ def create_order(request):
         item["book"].save()
 
     # Calculate total price using the model method
-    order.calculate_total()
+
 
     serializer = OrderSerializer(order)
     return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -422,9 +423,15 @@ def export_data(request):
             value = getattr(obj, field, "")
             ws.cell(row=row_num, column=col_num, value=str(value))
 
+    # Сохраняем в байтовый поток
+    from io import BytesIO
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+
     response = HttpResponse(
+        output.getvalue(),
         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
     response["Content-Disposition"] = f"attachment; filename={model_name}.xlsx"
-    wb.save(response)
     return response
