@@ -187,3 +187,10 @@ SWAGGER_SETTINGS = {
     "JSON_EDITOR": True,
     "SUPPORTED_SUBMIT_METHODS": ["get", "post", "put", "delete", "patch"],
 }
+
+# Use SQLite for tests
+if 'test' in os.sys.argv:
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': ':memory:',
+    }
