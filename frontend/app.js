@@ -1,4 +1,3 @@
-// ===== КОНФИГУРАЦИЯ =====
 const API_BASE = "http://localhost:8000/api";
 let currentUser = null;
 let token = localStorage.getItem("token");
@@ -7,13 +6,11 @@ let currentBook = null;
 let currentPage = 1;
 let currentFilters = {};
 
-// ===== ИНИЦИАЛИЗАЦИЯ =====
 document.addEventListener("DOMContentLoaded", () => {
   initializeApp();
 });
 
 async function initializeApp() {
-  // Проверка токена и загрузка данных пользователя
   if (token) {
     try {
       await loadUserData();
@@ -23,14 +20,11 @@ async function initializeApp() {
     }
   }
 
-  // Обновление счетчика корзины
   updateCartCount();
 
-  // Загрузка начальной страницы
   showPage("books");
 }
 
-// ===== УПРАВЛЕНИЕ ПОЛЬЗОВАТЕЛЕМ =====
 async function loadUserData() {
   const response = await fetchAPI("/users/", "GET", null, true);
   if (response.ok) {
@@ -61,7 +55,6 @@ function updateUIForGuest() {
   document.getElementById("orders-mobile-nav").style.display = "none";
 }
 
-// ===== АУТЕНТИФИКАЦИЯ =====
 async function handleLogin(event) {
   event.preventDefault();
   const username = document.getElementById("login-username").value;
@@ -144,7 +137,6 @@ function logout() {
   showPage("books");
 }
 
-// ===== API ФУНКЦИИ =====
 async function fetchAPI(
   endpoint,
   method = "GET",
@@ -173,20 +165,16 @@ async function fetchAPI(
   return await fetch(API_BASE + endpoint, config);
 }
 
-// ===== НАВИГАЦИЯ =====
 function showPage(pageName) {
-  // Скрыть все страницы
   document.querySelectorAll(".page").forEach((page) => {
     page.classList.remove("active");
   });
 
-  // Показать нужную страницу
   const page = document.getElementById(pageName + "-page");
   if (page) {
     page.classList.add("active");
   }
 
-  // Загрузить данные для страницы
   switch (pageName) {
     case "books":
       loadBooks();
@@ -211,7 +199,6 @@ function toggleMobileMenu() {
   menu.classList.toggle("active");
 }
 
-// ===== МОДАЛЬНЫЕ ОКНА =====
 function showLoginModal() {
   document.getElementById("login-modal").classList.add("active");
 }
@@ -224,14 +211,12 @@ function closeModal(modalId) {
   document.getElementById(modalId).classList.remove("active");
 }
 
-// Закрытие модальных окон по клику вне их
 window.addEventListener("click", (event) => {
   if (event.target.classList.contains("modal")) {
     event.target.classList.remove("active");
   }
 });
 
-// ===== КНИГИ =====
 async function loadBooks() {
   const booksListDiv = document.getElementById("books-list");
   booksListDiv.innerHTML =
@@ -239,7 +224,6 @@ async function loadBooks() {
 
   let url = `/books/?page_size=100`;
 
-  // Добавляем фильтры
   if (currentFilters.search) {
     url += `&search=${encodeURIComponent(currentFilters.search)}`;
   }
@@ -345,11 +329,11 @@ function displayBookDetail(book) {
   const addToCartBtn =
     book.stock > 0
       ? `<button class="btn btn-primary" onclick="addToCart(${book.id})">
-               <i class="fas fa-cart-plus"></i> Добавить в корзину
-           </button>`
+                <i class="fas fa-cart-plus"></i> Добавить в корзину
+            </button>`
       : `<button class="btn btn-danger" disabled>
-               <i class="fas fa-times"></i> Нет в наличии
-           </button>`;
+                <i class="fas fa-times"></i> Нет в наличии
+            </button>`;
 
   const detailImageHtml = book.cover_image
     ? `<img src="${escapeHtml(book.cover_image)}" alt="${escapeHtml(book.title)}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">`
@@ -535,7 +519,6 @@ async function submitReview(event) {
   }
 }
 
-// ===== АВТОРЫ =====
 async function loadAuthors() {
   const authorsListDiv = document.getElementById("authors-list");
   authorsListDiv.innerHTML =
@@ -605,7 +588,6 @@ async function loadAuthorsFilter() {
   }
 }
 
-// ===== ФИЛЬТРАЦИЯ И ПОИСК =====
 function applyFilters() {
   const search = document.getElementById("search-input").value;
   const author = document.getElementById("author-filter").value;
@@ -629,7 +611,6 @@ function handleSearchKeyup(event) {
   }
 }
 
-// ===== КОРЗИНА =====
 function addToCart(bookId) {
   if (!token) {
     showToast("Войдите в систему для добавления в корзину", "warning");
@@ -681,7 +662,6 @@ async function renderCart() {
     return;
   }
 
-  // Загрузка информации о книгах
   const bookDetails = await Promise.all(
     cart.map(async (item) => {
       if (!item.book || !item.book.title) {
@@ -825,7 +805,6 @@ async function createOrder() {
   }
 }
 
-// ===== ЗАКАЗЫ =====
 async function loadOrders() {
   const ordersListDiv = document.getElementById("orders-list");
   ordersListDiv.innerHTML =
@@ -913,16 +892,13 @@ function displayOrders(orders) {
   });
 }
 
-// ===== ПАГИНАЦИЯ (отключена) =====
 function displayPagination(data, prefix, loadFunction) {
-  // Пагинация отключена - все данные загружаются сразу
   const paginationDiv = document.getElementById(`${prefix}-pagination`);
   if (paginationDiv) {
     paginationDiv.innerHTML = "";
   }
 }
 
-// ===== TOAST УВЕДОМЛЕНИЯ =====
 function showToast(message, type = "info") {
   const container = document.getElementById("toast-container");
   const toast = document.createElement("div");
@@ -950,7 +926,6 @@ function showToast(message, type = "info") {
   }, 3000);
 }
 
-// ===== УТИЛИТЫ =====
 function escapeHtml(text) {
   const div = document.createElement("div");
   div.textContent = text;

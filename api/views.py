@@ -24,7 +24,6 @@ from .serializers import (
 )
 
 
-# Регистрация пользователя
 @swagger_auto_schema(
     method="post",
     request_body=RegisterSerializer,
@@ -35,10 +34,6 @@ from .serializers import (
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def register_view(request):
-    """
-    Регистрация нового пользователя в системе.
-    Возвращает данные пользователя и JWT токены.
-    """
     serializer = RegisterSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save()

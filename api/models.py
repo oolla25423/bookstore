@@ -2,7 +2,6 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-# Абстрактная базовая модель с полями created_at и updated_at
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
@@ -11,7 +10,6 @@ class BaseModel(models.Model):
         abstract = True
 
 
-# Пользовательская модель пользователя с ролями
 class User(AbstractUser, BaseModel):
     ROLE_CHOICES = [
         ("guest", "Гость"),
@@ -27,7 +25,6 @@ class User(AbstractUser, BaseModel):
         verbose_name_plural = "Пользователи"
 
 
-# Модель автора
 class Author(BaseModel):
     name = models.CharField(max_length=100, verbose_name="Имя автора")
     bio = models.TextField(blank=True, verbose_name="Биография")
@@ -40,7 +37,6 @@ class Author(BaseModel):
         verbose_name_plural = "Авторы"
 
 
-# Модель книги
 class Book(BaseModel):
     title = models.CharField(max_length=200, verbose_name="Название")
     author = models.ForeignKey(
@@ -61,7 +57,6 @@ class Book(BaseModel):
         verbose_name_plural = "Книги"
 
 
-# Модель заказа
 class Order(BaseModel):
     user = models.ForeignKey(
         User,
@@ -87,7 +82,6 @@ class Order(BaseModel):
         return f"Заказ {self.id} от {self.user.username}"
 
     def calculate_total(self):
-        """Calculate total price of all items in the order"""
         total = sum(item.price * item.quantity for item in self.items.all())
         self.total_price = total
         self.save()
@@ -98,7 +92,6 @@ class Order(BaseModel):
         verbose_name_plural = "Заказы"
 
 
-# Промежуточная модель для элементов заказа
 class OrderItem(BaseModel):
     order = models.ForeignKey(
         Order, on_delete=models.CASCADE, related_name="items", verbose_name="Заказ"
@@ -117,7 +110,6 @@ class OrderItem(BaseModel):
         verbose_name_plural = "Элементы заказа"
 
 
-# Модель отзыва
 class Review(BaseModel):
     user = models.ForeignKey(
         User,
