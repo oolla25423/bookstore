@@ -64,6 +64,20 @@
         <a href="#" onclick="showCart(); toggleMobileMenu(); return false;">
             <i class="fas fa-shopping-cart"></i> Корзина
         </a>
+        <div class="user-menu-mobile" id="user-menu-mobile" style="display:none;">
+            <span class="user-name" id="user-name-mobile"></span>
+            <button class="btn btn-danger" onclick="logout(); toggleMobileMenu();">
+                <i class="fas fa-sign-out-alt"></i> Выход
+            </button>
+        </div>
+        <div class="auth-buttons-mobile" id="auth-buttons-mobile">
+            <button class="btn btn-primary" onclick="showLoginModal(); toggleMobileMenu();">
+                <i class="fas fa-sign-in-alt"></i> Вход
+            </button>
+            <button class="btn btn-secondary" onclick="showRegisterModal(); toggleMobileMenu();">
+                <i class="fas fa-user-plus"></i> Регистрация
+            </button>
+        </div>
     </div>
 
     <!-- Основной контент -->

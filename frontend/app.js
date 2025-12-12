@@ -39,18 +39,33 @@ async function loadUserData() {
 }
 
 function updateUIForLoggedInUser() {
+  // Desktop UI
   document.getElementById("login-btn").style.display = "none";
   document.getElementById("register-btn").style.display = "none";
   document.getElementById("user-menu").style.display = "flex";
   document.getElementById("user-name").textContent = currentUser.username;
+  
+  // Mobile UI
+  document.getElementById("auth-buttons-mobile").style.display = "none";
+  document.getElementById("user-menu-mobile").style.display = "flex";
+  document.getElementById("user-name-mobile").textContent = currentUser.username;
+  
+  // Navigation
   document.getElementById("orders-nav").style.display = "block";
   document.getElementById("orders-mobile-nav").style.display = "block";
 }
 
 function updateUIForGuest() {
+  // Desktop UI
   document.getElementById("login-btn").style.display = "inline-flex";
   document.getElementById("register-btn").style.display = "inline-flex";
   document.getElementById("user-menu").style.display = "none";
+  
+  // Mobile UI
+  document.getElementById("auth-buttons-mobile").style.display = "flex";
+  document.getElementById("user-menu-mobile").style.display = "none";
+  
+  // Navigation
   document.getElementById("orders-nav").style.display = "none";
   document.getElementById("orders-mobile-nav").style.display = "none";
 }
@@ -196,12 +211,11 @@ function showPage(pageName) {
 
 function toggleMobileMenu() {
     const menu = document.getElementById("mobile-menu");
+    const isActive = menu.classList.contains("active");
     
-    if (menu.style.display === "flex") {
-        menu.style.display = "none";
+    if (isActive) {
         menu.classList.remove("active");
     } else {
-        menu.style.display = "flex";
         menu.classList.add("active");
     }
 }
@@ -227,10 +241,9 @@ window.addEventListener("click", (event) => {
     const mobileMenu = document.getElementById("mobile-menu");
     const mobileMenuToggle = document.querySelector(".mobile-menu-toggle");
     
-    if (mobileMenu && mobileMenu.style.display === "flex" &&
+    if (mobileMenu && mobileMenu.classList.contains("active") &&
         !mobileMenu.contains(event.target) &&
         !mobileMenuToggle.contains(event.target)) {
-        mobileMenu.style.display = "none";
         mobileMenu.classList.remove("active");
     }
 });
