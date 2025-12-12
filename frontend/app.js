@@ -195,8 +195,15 @@ function showPage(pageName) {
 }
 
 function toggleMobileMenu() {
-  const menu = document.getElementById("mobile-menu");
-  menu.classList.toggle("active");
+    const menu = document.getElementById("mobile-menu");
+    
+    if (menu.style.display === "flex") {
+        menu.style.display = "none";
+        menu.classList.remove("active");
+    } else {
+        menu.style.display = "flex";
+        menu.classList.add("active");
+    }
 }
 
 function showLoginModal() {
@@ -212,9 +219,20 @@ function closeModal(modalId) {
 }
 
 window.addEventListener("click", (event) => {
-  if (event.target.classList.contains("modal")) {
-    event.target.classList.remove("active");
-  }
+    if (event.target.classList.contains("modal")) {
+        event.target.classList.remove("active");
+    }
+    
+    // Закрыть мобильное меню при клике вне его
+    const mobileMenu = document.getElementById("mobile-menu");
+    const mobileMenuToggle = document.querySelector(".mobile-menu-toggle");
+    
+    if (mobileMenu && mobileMenu.style.display === "flex" &&
+        !mobileMenu.contains(event.target) &&
+        !mobileMenuToggle.contains(event.target)) {
+        mobileMenu.style.display = "none";
+        mobileMenu.classList.remove("active");
+    }
 });
 
 async function loadBooks() {

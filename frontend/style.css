@@ -129,10 +129,10 @@ body {
     color: white;
     font-size: 1.5rem;
     cursor: pointer;
+    padding: 0.5rem;
 }
 
 .mobile-menu {
-    display: none;
     background-color: var(--primary-color);
     flex-direction: column;
     padding: 1rem;
@@ -141,10 +141,12 @@ body {
     left: 0;
     right: 0;
     box-shadow: var(--shadow);
+    z-index: 1000;
+    display: none;
 }
 
 .mobile-menu.active {
-    display: flex;
+    display: flex !important;
 }
 
 .mobile-menu a {
